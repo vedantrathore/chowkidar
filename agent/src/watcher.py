@@ -1,3 +1,5 @@
+import time
+import os
 from pprint import pprint
 
 from watchdog.events import FileSystemEventHandler
@@ -39,9 +41,8 @@ class SSHAuthEventHandler(FileSystemEventHandler):
         self.process(event)
 
     def process(self, event):
-        # filename, ext = os.path.splitext(event.src_path)
+        filename, ext = os.path.splitext(event.src_path)
         pprint(filename)
-        filename
         # filename = f"{filename}_thumbnail.jpg"
 
         # image = Image.open(event.src_path)

@@ -11,12 +11,19 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*WORKDIR /app
 
 RUN addgroup --system chowkidar-agent \
-    && adduser --system --ingroup chowkidar-agent chowkidar-agent
+    && adduser --system --ingroup chowkidar-agent chowkidar-agent \
+    && usermod -a -G adm chowkidar-agent
+
+RUN mkdir -p /logs
 
 # Requirements are installed here to ensure they will be cached.
 COPY ./src/requirements.txt /requirements.txt
 RUN pip install --no-cache-dir -r /requirements.txt \
   && rm -rf /requirements.txt
+
+COPY --chown=chowkidar-agent:chowkidar-agent ./scripts/entrypoint /entrypoint
+RUN sed -i 's/\r$//g' /entrypoint
+RUN chmod +x /entrypoint
 
 COPY --chown=chowkidar-agent:chowkidar-agent ./scripts/start-watcher /start-watcher
 RUN sed -i 's/\r$//g' /start-watcher
@@ -33,4 +40,4 @@ USER chowkidar-agent
 
 WORKDIR /app
 
-ENTRYPOINT ["./scripts/entrypoint"]
+ENTRYPOINT ["/entrypoint"]

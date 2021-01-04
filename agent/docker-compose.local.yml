@@ -7,24 +7,24 @@ services:
       dockerfile: ./Dockerfile
     image: chowkidar-agent-watcher
     container_name: chowkidar-agent-watcher
-    # depends_on:
-    #   - redis
+    depends_on:
+      - redis
     volumes:
       - ./:/app:z
-      - ${SSH_AUTH_LOG_FILE_DIR}:/logs
+      - ${SSH_AUTH_LOG_FILE_DIR}-${SSH_AUTH_LOG_FILE_NAME}:/app/${SSH_AUTH_LOG_FILE_NAME}
     env_file:
       - ./src/.env.sample
     command: /start-watcher
 
-  # redis:
-  #   image: redis:5.0
-  #   container_name: redis
+  redis:
+    image: redis:5.0
+    container_name: redis
 
-  # celeryworker:
-  #   <<: *watcher
-  #   image: chowkidar-agent-worker
-  #   container_name: chowkidar-agent-worker
-  #   depends_on:
-  #     - redis
-  #   ports: []
-  #   command: /start-celery
+  celeryworker:
+    <<: *watcher
+    image: chowkidar-agent-worker
+    container_name: chowkidar-agent-worker
+    depends_on:
+      - redis
+    ports: []
+    command: celery -A src.celery_app worker -l INFO

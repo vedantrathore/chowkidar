@@ -11,7 +11,7 @@ services:
     #   - redis
     volumes:
       - ./:/app:z
-      - ${SSH_AUTH_LOG_FILE_PATH}:${SSH_LOG_MOUNTED_PATH}
+      - ${SSH_AUTH_LOG_FILE_DIR}:/logs
     env_file:
       - ./src/.env.sample
     command: /start-watcher

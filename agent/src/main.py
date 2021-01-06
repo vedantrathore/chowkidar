@@ -1,6 +1,10 @@
+# -*- coding : utf-8 -*-
 import sys
+
+from subprocess import CalledProcessError
 from cache import CacheManager
 from processor import SSHAuthFileProcessor
+from handler import SSHAuthEventHandler
 from watcher import SSHAuthWatcher
 from env import AUTH_LOG_FILE_PATH
 

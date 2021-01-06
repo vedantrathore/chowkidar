@@ -1,10 +1,16 @@
+# -*- coding : utf-8 -*-
+from __future__ import absolute_import
+
 import requests
 
-from __future__ import absolute_import
-from src.celery_app import app
-from src.env import SERVER_WEBHOOK_URL
+from celery_app import app
+from celery.utils.log import get_task_logger
+from env import SERVER_WEBHOOK_URL
+from pprint import pprint
+
+logger = get_task_logger(__name__)
 
 @app.task
 def trigger_webhook(data):
-    r = requests.post(SERVER_WEBHOOK_URL, data=data)
-    print(r.json())
+    r = requests.post(SERVER_WEBHOOK_URL, json=data)
+    logger.info(r.json())

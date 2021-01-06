@@ -13,7 +13,7 @@ services:
       - ./:/app:z
       - ${SSH_AUTH_LOG_FILE_DIR}-${SSH_AUTH_LOG_FILE_NAME}:/app/${SSH_AUTH_LOG_FILE_NAME}
     env_file:
-      - ./src/.env.sample
+      - ./.env.sample
     command: /start-watcher
 
   redis:

@@ -1,3 +1,5 @@
+# -*- coding : utf-8 -*-
+
 import os
 import hashlib
 import subprocess
@@ -17,8 +19,8 @@ class SSHAuthFileProcessor():
     def __get_last_line_read(self):
         return self.__gen_hash(
             subprocess.check_output(['tail', '-1', self.file])
-                .decode('utf-8')
-                .strip()
+            .decode('utf-8')
+            .strip()
         )
 
     def __update_cache(self):
@@ -27,15 +29,15 @@ class SSHAuthFileProcessor():
 
     # subroutine to read lines in reverse from a file
     def __read_reverse(self, buf_size=8192):
-        with open(self.file) as fh:
+        with open(self.file) as file_handler:
             segment = None
             offset = 0
-            fh.seek(0, os.SEEK_END)
-            file_size = remaining_size = fh.tell()
+            file_handler.seek(0, os.SEEK_END)
+            file_size = remaining_size = file_handler.tell()
             while remaining_size > 0:
                 offset = min(file_size, offset + buf_size)
-                fh.seek(file_size - offset)
-                buffer = fh.read(min(remaining_size, buf_size))
+                file_handler.seek(file_size - offset)
+                buffer = file_handler.read(min(remaining_size, buf_size))
                 remaining_size -= buf_size
                 lines = buffer.split('\n')
                 if segment is not None:
@@ -51,19 +53,16 @@ class SSHAuthFileProcessor():
             if segment is not None:
                 yield segment
 
-    def trigger_event(self):
+    def process_trigger(self):
         producer = self.__read_reverse()
         try:
-            event_lines = []
             while True:
                 line = next(producer)
                 lhash = self.__gen_hash(line)
-                if lhash != self.last_line_read:
-                    event_lines.append(line)
+                if lhash != self.last_line_read and 'sshd' in line:
+                    yield line
                     continue
                 self.__update_cache()
                 break
-            trigger_webhook.delay({'messages' : event_lines.reverse()})
-            event_lines = []
         except StopIteration:
             print("File read completely")

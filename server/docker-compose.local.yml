@@ -9,17 +9,23 @@ services:
     container_name: chowkidar-server
     depends_on:
       - influxdb
+    env_file:
+      - ./.env.sample
+    ports:
+      - '3030:3030'
   influxdb:
+    container_name: chowkidar-influx
     image: influxdb:latest
     ports:
       - '8086:8086'
     volumes:
       - influxdb-storage:/var/lib/influxdb
     environment:
-      - INFLUXDB_DB=db0
+      - INFLUXDB_DB=${INFLUXDB_DATABASE}
       - INFLUXDB_ADMIN_USER=${INFLUXDB_USERNAME}
       - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_PASSWORD}
   chronograf:
+    container_name: chowkidar-chronograf
     image: chronograf:latest
     ports:
       - '127.0.0.1:8888:8888'
@@ -32,6 +38,7 @@ services:
       - INFLUXDB_USERNAME=${INFLUXDB_USERNAME}
       - INFLUXDB_PASSWORD=${INFLUXDB_PASSWORD}
   grafana:
+    container_name: chowkidar-grafana
     image: grafana/grafana:latest
     ports:
       - '3000:3000'

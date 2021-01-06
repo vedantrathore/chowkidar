@@ -1,6 +1,7 @@
 import os
 import hashlib
 import subprocess
+from tasks import trigger_webhook
 
 class SSHAuthFileProcessor():
     def __init__(self, file_path, cache):
@@ -62,7 +63,7 @@ class SSHAuthFileProcessor():
                     continue
                 self.__update_cache()
                 break
-            pprint(event_lines.reverse())
+            trigger_webhook.delay({'messages' : event_lines.reverse()})
             event_lines = []
         except StopIteration:
             print("File read completely")

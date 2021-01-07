@@ -1,6 +1,7 @@
 # -*- coding : utf-8 -*-
 
 import os
+import re
 import hashlib
 import subprocess
 from tasks import trigger_webhook
@@ -66,3 +67,40 @@ class SSHAuthFileProcessor():
                 break
         except StopIteration:
             print("File read completely")
+
+    def process_message(self, message):
+        try:
+            tokens = message.split(' ')
+            log_time = ' '.join(tokens[0:4])
+            log_host = tokens[4]
+            log_pid = re.search(r'sshd\[(\d+)\]',tokens[5]).group(1)
+            log_msg = tokens[6: ]
+            log_type = ''
+            log_connection_type = ''
+            log_user = ''
+            log_remote_ip = ''
+            log_remote_port = ''
+            if 'Accepted' in log_msg:
+                log_type = 'connected'
+                log_connection_type = tokens[7]
+                log_user = tokens[9]
+                log_remote_ip = tokens[11]
+                log_remote_port = tokens[13]
+            elif 'Disconnected' in log_msg:
+                log_type = 'disconnected'
+                log_connection_type = ''
+                log_user = tokens[9]
+                log_remote_ip = tokens[10]
+                log_remote_port = tokens[12]
+            return {
+                'pid': log_pid,
+                'time': log_time,
+                'host': log_host,
+                'type': log_type,
+                'user': log_user,
+                'remote_ip': log_remote_ip,
+                'remote_port': log_remote_port,
+                'connection_type': log_connection_type
+            }
+        except Exception as e:
+            print(e)

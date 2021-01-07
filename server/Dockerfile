@@ -15,6 +15,4 @@ USER chowkidar-server
 
 EXPOSE 3030
 
-ENTRYPOINT [ "node" ]
-
-CMD [ "src/server.js" ]
+ENTRYPOINT [ "npx" ]

@@ -13,6 +13,9 @@ services:
       - ./.env.sample
     ports:
       - '3030:3030'
+    volumes:
+      - ./:/app
+    command: nodemon src/server.js
   influxdb:
     container_name: chowkidar-influx
     image: influxdb:latest
@@ -50,6 +53,7 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USERNAME}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_INSTALL_PLUGINS=grafana-worldmap-panel
 volumes:
   influxdb-storage:
   chronograf-storage:

@@ -278,3 +278,5 @@ my_awesome_project/media/
 !.envs/.local/
 
 .vscode/
+
+./agent/src/.test.sh

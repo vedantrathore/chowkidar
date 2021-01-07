@@ -15,8 +15,9 @@ class SSHAuthEventHandler(FileSystemEventHandler):
 
     def process(self, event):
         for data in self.processor.process_trigger():
+            message_data = self.processor.process_message(data)
             trigger_webhook.delay({
                 'ip': self.ip,
-                'message': data,
+                'message': message_data,
                 'time': datetime.utcnow().isoformat()
             })

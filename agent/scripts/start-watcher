@@ -7,4 +7,4 @@ set -o nounset
 
 # N.B. If only .env files supported variable expansion...
 # export CELERY_BROKER_URL="${REDIS_URL}"
-python src/main.py
+cd src && python main.py

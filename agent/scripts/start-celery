@@ -4,5 +4,4 @@ set -o errexit
 set -o pipefail
 set -o nounset
 
-
-celery -A celery_app worker -l INFO
+cd src && celery -A celery_app worker -l INFO

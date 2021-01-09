@@ -21,10 +21,3 @@ resource "aws_cloudwatch_log_group" "chowkidar_influxdb" {
 
   tags = local.tags
 }
-
-
-resource "aws_efs_file_system" "ecs_service_storage" {
-  tags = {
-    Name = "${var.service_name}-efs"
-  }
-}

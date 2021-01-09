@@ -1,6 +1,6 @@
-############################
-# ECS cluster and IAM roles
-############################
+##############################################
+# ECS cluster, service discovery and IAM roles
+##############################################
 module "ecs" {
   source  = "terraform-aws-modules/ecs/aws"
   version = "v2.0.0"
@@ -70,4 +70,29 @@ resource "aws_iam_role_policy" "ecs_task_access_secrets" {
     ),
     0,
   )
+}
+
+resource "aws_service_discovery_private_dns_namespace" "chowkidar_dns_namespace" {
+  name        = "chowkidar"
+  description = "Private DNS namespace for chowkidar"
+  vpc         = var.vpc_id
+}
+
+resource "aws_service_discovery_service" "chowkidar_discovery_service" {
+  name = "internal"
+
+  dns_config {
+    namespace_id = aws_service_discovery_private_dns_namespace.chowkidar_dns_namespace.id
+
+    dns_records {
+      ttl  = 10
+      type = "A"
+    }
+
+    routing_policy = "MULTIVALUE"
+  }
+
+  health_check_custom_config {
+    failure_threshold = 1
+  }
 }

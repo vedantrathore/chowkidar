@@ -280,3 +280,5 @@ my_awesome_project/media/
 .vscode/
 
 ./agent/src/.test.sh
+
+.terraform

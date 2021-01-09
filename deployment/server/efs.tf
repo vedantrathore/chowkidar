@@ -7,10 +7,10 @@ resource "aws_efs_file_system" "ecs_service_storage" {
   }
 }
 
-resource "aws_efs_mount_target" "ecs_service_storage" {
-  count           = length(var.private_subnet_ids)
+resource "aws_efs_mount_target" "efs_mount_target" {
+  count = length(var.private_subnet_ids)
 
   file_system_id  = aws_efs_file_system.ecs_service_storage.id
   subnet_id       = var.private_subnet_ids[count.index]
-  security_groups = [aws_security_group.efs_sg.id]
+  security_groups = [module.efs_sg.this_security_group_id]
 }

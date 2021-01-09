@@ -80,5 +80,9 @@ resource "aws_ecs_service" "chowkidar_server" {
     target_group_arn = element(module.alb.target_group_arns, 0)
   }
 
+  service_registries {
+    registry_arn = aws_service_discovery_service.chowkidar_discovery_service.arn
+  }
+
   tags = local.tags
 }

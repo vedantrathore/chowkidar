@@ -1,3 +1,8 @@
+variable "assume_role_arn" {
+  description = "ARN of the role to assume into"
+  type        = string
+}
+
 variable "tags" {
   type        = map(string)
   description = "A map of tags to use on all resources"
@@ -70,11 +75,28 @@ variable "grafana_image" {
   default     = "grafana/grafana:latest"
 }
 
+variable "influxdb_image" {
+  description = "Docker image to run Influxdb server with. If not specified, official image will be used"
+  type        = string
+  default     = "influxdb:latest"
+}
+
 variable "chowkidar_version" {
-  description = "Verion of chowkidar to run. If not specified latest will be used"
+  description = "Version of chowkidar to run. If not specified latest will be used"
   type        = string
   default     = "latest"
 }
+
+variable "chowkidar_port" {
+  description = "Port on which chowkidar node webhook server should run"
+  type        = string
+}
+
+variable "influxdb_database_name" {
+  description = "Name of the influxdb database to connect"
+  type        = string
+}
+
 
 variable "custom_environment_secrets" {
   description = "List of additional secrets the container will use (list should contain maps with `name` and `valueFrom`)"

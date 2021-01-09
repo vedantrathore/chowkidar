@@ -41,7 +41,7 @@ module "container_definition_chowkidar_grafana" {
 }
 
 resource "aws_ecs_task_definition" "chowkidar_grafana" {
-  family                   = "chowkidar-server"
+  family                   = "chowkidar-grafana"
   execution_role_arn       = aws_iam_role.ecs_task_execution.arn
   task_role_arn            = aws_iam_role.ecs_task_execution.arn
   network_mode             = "awsvpc"
@@ -50,6 +50,15 @@ resource "aws_ecs_task_definition" "chowkidar_grafana" {
   memory                   = 512
 
   container_definitions = module.container_definition_chowkidar_server.json
+
+  volume {
+    name = "grafana-db"
+
+    efs_volume_configuration {
+      file_system_id = aws_efs_file_system.ecs_service_storage.id
+      root_directory = "/grafana"
+    }
+  }
 
   tags = local.tags
 }
@@ -83,6 +92,11 @@ resource "aws_ecs_service" "chowkidar_grafana" {
     container_port   = 3000
     target_group_arn = element(module.alb.target_group_arns, 1)
   }
+
+  service_registries {
+    registry_arn = aws_service_discovery_service.chowkidar_discovery_service.arn
+  }
+
 
   tags = local.tags
 }

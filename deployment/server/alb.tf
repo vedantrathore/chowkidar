@@ -3,7 +3,7 @@
 ###################
 module "alb" {
   source  = "terraform-aws-modules/alb/aws"
-  version = "v5.6.0"
+  version = "5.10.0"
 
   name     = "chowkidar"
   internal = false
@@ -37,10 +37,10 @@ module "alb" {
   https_listener_rules = [
     {
       https_listener_index = 0
-      priority = 5000
+      priority             = 5000
       actions = [
         {
-          type = "forward"
+          type               = "forward"
           target_group_index = 0
         }
       ]
@@ -52,7 +52,7 @@ module "alb" {
       https_listener_index = 1
       actions = [
         {
-          type = "forward"
+          type               = "forward"
           target_group_index = 1
         }
       ]

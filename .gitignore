@@ -282,3 +282,5 @@ my_awesome_project/media/
 ./agent/src/.test.sh
 
 .terraform
+*.tfvars
+*.tfstate*

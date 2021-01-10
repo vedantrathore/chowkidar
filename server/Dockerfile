@@ -16,3 +16,5 @@ USER chowkidar-server
 EXPOSE 3030
 
 ENTRYPOINT [ "npx" ]
+
+CMD [ "nodemon", "src/server.js" ]

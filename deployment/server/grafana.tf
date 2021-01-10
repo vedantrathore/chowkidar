@@ -30,6 +30,13 @@ module "container_definition_chowkidar_grafana" {
     secretOptions = []
   }
 
+  mount_points = [
+    {
+      containerPath = "/var/lib/grafana"
+      sourceVolume = "grafana-db"
+    }
+  ]
+
   environment = concat(
     local.grafana_container_definition_environment
   )
@@ -49,14 +56,14 @@ resource "aws_ecs_task_definition" "chowkidar_grafana" {
   cpu                      = 256
   memory                   = 512
 
-  container_definitions = module.container_definition_chowkidar_server.json
+  container_definitions = module.container_definition_chowkidar_grafana.json
 
   volume {
     name = "grafana-db"
 
     efs_volume_configuration {
       file_system_id = aws_efs_file_system.ecs_service_storage.id
-      root_directory = "/grafana"
+      root_directory = "/var/lib/grafana"
     }
   }
 
@@ -70,6 +77,7 @@ data "aws_ecs_task_definition" "chowkidar_grafana" {
 }
 
 resource "aws_ecs_service" "chowkidar_grafana" {
+  platform_version = "1.4.0"
   name    = "chowkidar-grafana"
   cluster = module.ecs.this_ecs_cluster_id
   task_definition = "${data.aws_ecs_task_definition.chowkidar_grafana.family}:${max(

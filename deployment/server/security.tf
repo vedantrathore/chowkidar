@@ -50,6 +50,13 @@ module "chowkidar_sg" {
       description              = "Chowkidar grafana dashboard"
       source_security_group_id = module.alb_https_sg.this_security_group_id
     },
+    {
+      from_port                = 2049
+      to_port                  = 2049
+      protocol                 = "tcp"
+      description              = "Chowkidar EFS NFS port"
+      source_security_group_id = module.chowkidar_sg.this_security_group_id
+    },
   ]
 
   egress_rules = ["all-all"]
@@ -71,7 +78,7 @@ module "efs_sg" {
       to_port                  = 2049
       protocol                 = "tcp"
       description              = "Chowkidar EFS NFS port"
-      source_security_group_id = module.alb_https_sg.this_security_group_id
+      source_security_group_id = module.chowkidar_sg.this_security_group_id
     },
   ]
 

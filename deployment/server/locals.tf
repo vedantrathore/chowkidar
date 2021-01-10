@@ -10,7 +10,7 @@ locals {
   server_container_definition_environment = [
     {
       name  = "INFLUXDB_HOST"
-      value = "chowkidar-server.internal.chowkidar"
+      value = "chowkidar-influxdb.internal.chowkidar"
     },
     {
       name  = "INFLUXDB_DATABASE"

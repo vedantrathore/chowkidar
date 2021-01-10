@@ -49,7 +49,7 @@ resource "aws_ecs_task_definition" "chowkidar_influxdb" {
   cpu                      = 256
   memory                   = 512
 
-  container_definitions = module.container_definition_chowkidar_server.json
+  container_definitions = module.container_definition_chowkidar_influxdb.json
 
   volume {
     name = "influx-db"
@@ -70,6 +70,7 @@ data "aws_ecs_task_definition" "chowkidar_influxdb" {
 }
 
 resource "aws_ecs_service" "chowkidar_influxdb" {
+  platform_version = "1.4.0"
   name    = "chowkidar-influxdb"
   cluster = module.ecs.this_ecs_cluster_id
   task_definition = "${data.aws_ecs_task_definition.chowkidar_influxdb.family}:${max(

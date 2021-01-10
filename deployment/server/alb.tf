@@ -31,7 +31,7 @@ module "alb" {
       port               = 443
       protocol           = "HTTPS"
       certificate_arn    = module.acm.this_acm_certificate_arn
-    },
+    }
   ]
 
   https_listener_rules = [
@@ -49,7 +49,7 @@ module "alb" {
       }]
     },
     {
-      https_listener_index = 1
+      https_listener_index = 0
       actions = [
         {
           type               = "forward"

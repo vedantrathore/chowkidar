@@ -8,6 +8,7 @@ module "container_definition_chowkidar_server" {
   container_name  = "chowkidar-server"
   container_image = local.chowkidar_image
 
+
   container_cpu                = 256
   container_memory             = 512
   container_memory_reservation = 128
@@ -30,10 +31,15 @@ module "container_definition_chowkidar_server" {
     secretOptions = []
   }
 
+  environment = concat(
+    local.server_container_definition_environment
+  )
+
   secrets = concat(
     local.server_container_definition_secrets,
     var.custom_environment_secrets,
   )
+
 }
 
 resource "aws_ecs_task_definition" "chowkidar_server" {

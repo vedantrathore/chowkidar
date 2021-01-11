@@ -1,0 +1,10 @@
+---
+- name: Install and setup docker
+  include: docker.yml
+  when: Deploy=='fresh'
+  tags: docker
+  become: yes
+
+- name: Install chowkidar agent
+  include: agent.yml
+  tags: chowkidar-agent

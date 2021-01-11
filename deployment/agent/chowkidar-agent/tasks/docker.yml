@@ -1,0 +1,77 @@
+---
+- name: removing older versions if exists
+  yum: 
+    name: ['docker', 'docker-client', 'docker-client-latest', 'docker-common', 'docker-latest', 'docker-latest-logrotate', 'docker-logrotate', 'docker-engine']
+    state: absent
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+- name: "installing prerequisite packages for centos or rhel"
+  yum:
+     name: ['yum-utils', 'device-mapper-persistent-data', 'lvm2']
+     state: present
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+- name: "Installing Docker Prerequisite packages if os is ubuntu"
+  apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: "APT-install misc packages for ubuntu or debian"
+  apt:
+     name: ['aptitude', 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common']
+     update_cache: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: "configuring docker-ce repo for centos"
+  get_url:
+     url: https://download.docker.com/linux/centos/docker-ce.repo
+     dest: /etc/yum.repos.d/docker-ce.repo
+     mode: 0644
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+- name: "adding docker GPG key for ubuntu or debian"
+  apt_key:
+     url: https://download.docker.com/linux/ubuntu/gpg
+     state: present
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: "adding docker repository for ubuntu or debian"
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+    state: present
+    filename: docker  
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' 
+
+- name: installing docker for centos
+  yum:
+     name: docker-ce
+     state: present
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+  notify: "start docker"
+  
+- name: installing docker for ubuntu or debian
+  apt:
+      name: "docker-ce"
+      update_cache: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  notify: "start docker"
+
+- name: calling handler forcefully
+  meta: flush_handlers
+
+- name: download binary file
+  get_url:
+    url: https://github.com/docker/compose/releases/download/1.27.4/docker-compose-Linux-x86_64
+    dest: /usr/local/bin/docker-compose
+    owner: root 
+    group: root
+    mode: 0755
+  become: yes
+
+- name: creating soft link for docker-compose
+  file: 
+    src: /usr/local/bin/docker-compose
+    dest: /usr/bin/docker-compose
+    state: link 
+    force: yes

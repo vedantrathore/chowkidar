@@ -1,0 +1,9 @@
+---
+- hosts: all
+  gather_facts: true
+  roles:
+    - chowkidar-agent
+  environment:
+   CHOWKIDAR_SSH_AUTH_LOG_FILE_NAME: auth.log # "secure" if OS is centos/RH 
+   CHOWKIDAR_SERVER_WEBHOOK_URL: https://chowkidar.vedantrathore.co/webhook
+   CHOWKIDAR_AGENT_TAG: latest

@@ -1,0 +1,146 @@
+# tasks file for chowkidar-agent
+---
+- name: calculating timestamp value ansible to be used in the whole process
+  set_fact:
+    timestamp: "{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S') }}"
+
+- name: creating required folders on remote
+  file: path={{ item.name }} owner={{ item.owner }} group={{ item.group }} state=directory mode=755 recurse=yes
+  with_items:
+    - { name: '/opt/packages/chwokidar', owner: 'centos', group: 'centos', }
+    - { name: '/var/log/chowkidar', owner: '122', group: '122' }
+  become: yes
+
+- name: adding user 'centos' to group docker
+  user:
+    name: 'centos'
+    groups: docker
+    append: yes
+  become: yes
+
+- name: upgrade pip
+  pip:
+    name: pip
+    extra_args: --upgrade
+  become: yes
+
+- name: install python docker libraries
+  pip: 
+    name: docker
+    state: present
+    extra_args: --ignore-installed
+  become: yes
+  
+- name: usermod centos to docker group
+  command: "usermod -aG docker centos"
+  become: yes
+
+- name: docker service started
+  service:
+    name: docker
+    state: started
+  become: yes
+
+- name: changing mode of docker sock
+  command: "chmod 777 /var/run/docker.sock"
+  become: yes
+
+- name: copy compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: /opt/packages/chowkidar/docker-compose.yml
+    owner: centos
+    group: centos
+    mode: 0644
+
+- name: copy env file
+  template: 
+    src: "env.j2"
+    dest: "/opt/packages/chowkidar/releases/env-{{ TAG }}"
+    owner: centos
+    group: centos
+    mode: 0644
+
+- name: check existance of previous link
+  stat: path=/opt/packages/chowkidar/previous
+  register: previous_link_exists
+
+### if previous doesn't exist, create current as previous 
+- name: creating new as previous symlink as previous doesn't exist 
+  file:
+    src: /opt/packages/chowkidar/releases/env-{{ TAG }}
+    dest: /opt/packages/chowkidar/previous
+    state: link
+    force: yes
+  when: previous_link_exists.stat.islnk is not defined
+
+- name: preserving location for previous symlink
+  shell: "readlink -f previous"
+  register: previous_tmp
+  args:
+    chdir: /opt/packages/chowkidar
+
+- name: checking if the current symlink exists
+  stat: path=/opt/packages/chowkidar/current
+  register: current_link_exists
+
+- name: creating new as current as current symlink doesn't exist so 
+  file:
+    src: /opt/packages/chowkidar/releases/env-{{ TAG }}
+    dest: /opt/packages/chowkidar/current
+    state: link
+    force: yes
+  when: current_link_exists.stat.islnk is not defined
+  
+- name: preserving location for current symlink
+  shell: "readlink -f current"
+  register: current_tmp
+  args:
+    chdir: /opt/packages/chowkidar
+
+- name: printing value of current_symlink
+  debug: var=current_tmp.stdout
+
+- name: updating previous to existing current symlink
+  file:
+    src: "{{ item }}"
+    dest: /opt/packages/chowkidar/previous
+    state: link
+    force: yes
+  with_items: "{{ current_tmp.stdout }}" 
+  
+- name: updating symbolic link of  current to newly updated code
+  file:
+    src: /opt/packages/chowkidar/releases/env-{{ TAG }}
+    dest: /opt/packages/chowkidar/current
+    state: link
+    force: yes
+
+- name: creating .env symbolic link     
+  file:
+    src: /opt/packages/chowkidar/current
+    dest: /opt/packages/chowkidar/.env
+    state: link
+    force: yes
+
+- name: Reomoving existing containers
+  shell: docker-compose down
+  args:
+   executable: bash
+   chdir: /opt/packages/chowkidar/
+  when: Deploy!='fresh'
+
+- name: spinning up container
+  shell: docker-compose up -d --remove-orphans
+  args: 
+    executable: bash
+    chdir: /opt/packages/chowkidar/
+  register: containers_state
+
+- name: containers change state
+  debug: var=containers_state.stderr_lines
+
+- name: pruning system
+  shell: docker system prune -f
+  args:
+    executable: bash
